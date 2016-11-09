@@ -31,71 +31,81 @@ def index():
     return "使い方 : /注文するsushi.jsonの添字番号"
 
 @app.route('/sushi/<int:sushi_num>') # 検索ワード/ページ数をパスから変数に受け取る
-def sushi(setting,sushi_num):
-    driver.save_screenshot(FILENAME1) # FILENAMEにスクショを上書き
+def sushi(sushi_num):
     f1 = open('setting.json','r') # settingファイルを読み込み
     setting_data = json.load(f1)
     f2 = open('sushi.json','r') # settingファイルを読み込み
     sushi_data = json.load(f2)
-    flag = 0
+    count = 0
     # ここからアカウントにログイン--------------- 
     login_button = driver.find_element_by_class_name("header_nav-login") # ログインボタンを取得
     login_button.find_element_by_tag_name("a").click() # ログインボタンをクリック
     login_form = driver.find_element_by_id("mail") # mail要素を取得
-    login_form.send_keys(setting_data["mail"]) # mailを入力
+    login_form.send_keys(setting_data[0]["mail"]) # mailを入力
     login_form = driver.find_element_by_id("password") # mail要素を取得
-    login_form.send_keys(setting_data["password"]) # mailを入力
+    login_form.send_keys(setting_data[0]["password"]) # mailを入力
     login_form.submit() # ログインをsubmitする
     print(u"ログイン完了")
     # ログイン処理終了----------------
-    # ここからメニューまで移動----------
-    driver.save_screenshot(FILENAME1) # FILENAMEにスクショを上書き
-
+    # ここからメニューまで移動---------
     menu = driver.find_element_by_class_name("header_utility-menu") # ヘッダーのメニューボタンをクリック
     menu.find_element_by_tag_name("a").click()
     
     # 注文予定の寿司のID分回す
-    print(sushi_data[sushi_num]["sushi"])
     for data_id in sushi_data[sushi_num]["sushi"]:
         # 一つ一つの寿司を確認していく
-        print(u"メニューだよ")
-        oke_menu = driver.find_element_by_xpath("//div[@class='menu_nav-btn']/a[@href='/menu/category_CO000/']") # 桶ボタンをクリック
-        oke_menu.click()
+        flag = 0    # 目当ての寿司発見フラグを初期化
 
-        sushi_list = driver.find_element_by_class_name("menulist") # 寿司のデータが有るリストの親要素を入手
-        sushis = sushi_list.find_elements_by_tag_name("li") # 親要素内の寿司のデータをリストで入手
-        
-        # ここから桶メニューの1商品ずつループ
-        for sushi in sushis:
-            if len(sushi_data[sushi_num]) > flag:
-                name = sushi.find_element_by_class_name("menulist_pdct").text
-                if "★" in name :
-                    sushi_id = name[0:name.find("★")]
-                else :
-                    sushi_id = name[0:name.find("　")]
-                # print(sushi_id)
+        # 注文予定の寿司が全て注文できたかどうか
+        if len(sushi_data[sushi_num]["sushi"]) > count:
+            print(u"メニューだよ")
+            print(str(len(sushi_data[sushi_num]["sushi"]))+":len  "+str(count)+":count")
+ 
+            # 上のメニューの桶ボタンをクリックする
+            oke_menu = driver.find_element_by_xpath("//div[@class='menu_nav-btn']/a[@href='/menu/category_CO000/']") # 桶ボタンをクリック
+            oke_menu.click()
+            sushi_list = driver.find_element_by_class_name("menulist") # 寿司のデータが有るリストの親要素を入手
+            sushis = sushi_list.find_elements_by_tag_name("li") # 親要素内の寿司のデータをリストで入手
             
-                if sushi_id == data_id["id"]:
-                    print(sushi_id + u"望みの寿司です")
-                    print(sushi.text)
-                    detail_btn = sushi.find_element_by_class_name("menulist_pic")
-                    detail_btn = detail_btn.find_element_by_tag_name("a")
-                    detail_btn.click()
-                    # ここで注文予定の寿司の詳細に移動
-                    driver.save_screenshot(FILENAME2) # FILENAMEにスクショを上書き 
-                    cart_btn = driver.find_element_by_class_name("js-fadein-button")
-                    cart_btn.click()
-                    driver.save_screenshot(FILENAME3) # FILENAMEにスクショを上書き
-                    flag += 1
-                else:
-                    print(u"違う寿司です")
-            else:
-                print(u"注文終了")
-                break
-        driver.save_screenshot(FILENAME3) # FILENAMEにスクショを上書き 
-    # driver.execute_script('window.scrollTo(0, 3000)') # ページャーのある下に移動
+            # ここから桶メニューの1商品ずつループ
+            for sushi in sushis:
+                # 注文する寿司を注文し終わったかどうか判定
+                if 0 == flag:
+                    # 寿司のタイトルからIDを抽出
+                    name = sushi.find_element_by_class_name("menulist_pdct").text
+                    if "★" in name :
+                        sushi_id = name[0:name.find("★")]
+                    else :
+                        sushi_id = name[0:name.find("　")]
+                    
+                    # お目当ての寿司かどうか判定
+                    if sushi_id == data_id["id"]:
+                        driver.save_screenshot(FILENAME2) # FILENAME 222 にスクショを上書き 
+                        print(sushi_id + u"望みの寿司です")
+                        print(sushi.text)
+                        detail_btn = sushi.find_element_by_class_name("btn-m") # 詳細ボタン
+                        detail_btn = detail_btn.find_element_by_tag_name("a") # 詳細ボタンのaタグ
+                        detail_btn.click()  # 商品詳細を見るボタンをクリック
 
-    driver.close() # ブラウザ操作を終わらせる
+                        # ここで注文予定の寿司の詳細に移動============================
+                        cart_btn = driver.find_element_by_class_name("js-fadein-button")
+                        cart_btn.click()
+                        # close_btn = driver.find_element_by_class_name("lv_back")
+                        # close_btn = close_btn.find_element_by_tag_name("a")
+                        # close_btn.click()
+                        flag = 1
+                        count += 1
+                    else:
+                        print(u"違う寿司です")
+                else:
+                    driver.save_screenshot(FILENAME1) # FILENAMEにスクショを上書き
+                    print(u"カートに入れました")
+                    break
+            else:
+                # 商品一覧の中に注文予定の寿司IDが存在しなかった場合の処理
+                print(u"注文予定の寿司ID"+data_id["id"]+"が見つからなかったためパスします。")
+
+    # driver.close() # ブラウザ操作を終わらせる
     return u"注文したよ！"
  
  
