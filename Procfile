@@ -1,0 +1,1 @@
+web: gunicorn sushi:app --log-file=-
