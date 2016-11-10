@@ -1,7 +1,5 @@
 [
     {
-        "address1":"home",
-        "address2":"",
         "sushi":[
             {
                 "id":"F19",
@@ -10,8 +8,6 @@
             ]
     },
     {
-        "address1":"",
-        "address2":"",
         "sushi":[
             {
                 "id":"F12",
