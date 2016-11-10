@@ -71,8 +71,16 @@ def sushi(sushi_number):
     # 注文予定の寿司を一つずつ取り出して回す
     for data_id in sushi_data[sushi_number]["sushi"]:   # 一つ一つの寿司を確認していく
         flag = 0    # 目当ての寿司発見フラグを初期化
-
-        # 注文予定の寿司が全て注文できたかどうか判定
+        sushi_num = int(data_id["num"]) - 1 # 寿司の注文予定の数
+        
+        # 寿司の個数が正しい範囲か判定
+        if 0>sushi_num or sushi_num > 9:
+            print(u" \n 寿司ID:"+ data_id["id"] +" 寿司個数:"+data_id["num"])
+            print(u"\n 注文予定の寿司の個数が1以上10以下ではないためをパスします----------------")
+            flag = 1
+            count += 1 
+            
+        # 注文予定の寿司が全てカートに入れるまで入る
         if len(sushi_data[sushi_number]["sushi"]) > count:
             
             # 上のメニューの桶ボタンをクリックする
@@ -86,8 +94,7 @@ def sushi(sushi_number):
 
             # ここから桶メニューの1商品ずつループ
             for sushi in sushis:
-
-                # 注文予定の寿司を注文し終わったか場合検索しないように判定
+                # 注文予定の寿司を注文し終わった場合以降の寿司を検索しないように判定
                 if 0 == flag:                    
                     # 寿司のタイトルからIDを抽出
                     name = sushi.find_element_by_class_name("menulist_pdct").text
@@ -105,7 +112,7 @@ def sushi(sushi_number):
                         detail_btn.click()  # 商品詳細を見るボタンをクリック
 
                         # ここで注文予定の寿司の詳細に移動============================
-                        sushi_num = int(data_id["num"]) - 1 # 寿司の注文予定の数
+                        # 注文予定の数を選択
                         num_btn_list = driver.find_element_by_class_name("form_radio-num")  # 個数ボタンのリストの親要素を取得
                         num_btn = num_btn_list.find_elements_by_class_name("col")   # 個数ボタンをリストで取得
                         num_btn[sushi_num].find_element_by_tag_name("label").click()    # 注文予定数のボタンをクリック
@@ -150,6 +157,7 @@ def sushi(sushi_number):
         ## regist_order.click()  # 配達確定ボタンを押す
         # print(regist_order.text)    # 要素を取れていることの確認
         print(u"\n注文を確定しました！")
+        
     driver.close() # ブラウザ操作を終わらせる
     return u"注文しました。確認メールが届くのをお待ち下さい\n"
  
