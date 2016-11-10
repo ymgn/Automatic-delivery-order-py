@@ -18,7 +18,7 @@ CORS(app)
 driver = webdriver.PhantomJS() # PhantomJSを使う 
 driver.set_window_size(1124, 850) # PhantomJSのサイズを指定する
 driver.implicitly_wait(10) # 指定した要素などがなかった場合出てくるまでdriverが最大20秒まで自動待機してくれる
-URL = "https://www.ginsara.jp/menu/"
+URL = "https://www.ginsara.jp/"
 driver.get(URL) # slideshareのURLにアクセスする
 
 # スクショ用のファイル設定
@@ -61,18 +61,20 @@ def sushi(sushi_number):
 
     driver.save_screenshot(FILENAME3) # ログイン後商品リストページをスクリーンショット
 
-    # if driver.find_element_by_class_name("attention_box").is_displayed():
-    #     print("error出てます")
-    #     error = driver.find_element_by_xpath("//div[@class='attention_box']/p[@class='error']")
-    #     print(error.text)
-    # else:
-    #     print("注文可能時間です")
+    # 注文時間外の場合注文できないので判定できるようにする　まだできていない
+    if driver.find_element_by_class_name("attention_box").is_displayed():
+        print("errorが表示されています。\n")
+        error = driver.find_element_by_xpath("//div[@class='attention_box mt10']/p[@class='error']")
+        print(error.text)
+        return u"営業時間外のため注文できませんでした。"
+    else:
+        print("営業時間内です")
 
     # 注文予定の寿司を一つずつ取り出して回す
     for data_id in sushi_data[sushi_number]["sushi"]:   # 一つ一つの寿司を確認していく
         flag = 0    # 目当ての寿司発見フラグを初期化
         sushi_num = int(data_id["num"]) - 1 # 寿司の注文予定の数
-        
+         
         # 寿司の個数が正しい範囲か判定
         if 0>sushi_num or sushi_num > 9:
             print(u" \n 寿司ID:"+ data_id["id"] +" 寿司個数:"+data_id["num"])
@@ -88,9 +90,7 @@ def sushi(sushi_number):
             oke_menu.click()    # 桶メニューを開く
             sushi_list = driver.find_element_by_class_name("menulist") # 寿司のデータが有るリストの親要素を入手
             sushis = sushi_list.find_elements_by_tag_name("li") # 親要素内の寿司のデータをリストで入手
-            
             print(u"\nメニューを見ます")
-            print(str(len(sushi_data[sushi_number]["sushi"]))+"個注文予定  "+str(count)+"個カートに入れました")
 
             # ここから桶メニューの1商品ずつループ
             for sushi in sushis:
@@ -130,6 +130,8 @@ def sushi(sushi_number):
             else:
                 # 商品一覧の中に注文予定の寿司IDが存在しなかった場合の処理
                 print(u"注文予定の寿司ID"+data_id["id"]+"が見つからなかったためパスします。")
+
+            print(str(len(sushi_data[sushi_number]["sushi"]))+"個注文予定  "+str(count)+"個カートに入れました")
     else:
         # 注文予定の寿司を全て商品カートに入れた時
         print(u"\n注文予定の寿司を全て商品カートに入れました")
