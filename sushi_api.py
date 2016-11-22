@@ -15,12 +15,6 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 CORS(app)
 
-driver = webdriver.PhantomJS() # PhantomJSを使う 
-driver.set_window_size(1124, 850) # PhantomJSのサイズを指定する
-driver.implicitly_wait(10) # 指定した要素などがなかった場合出てくるまでdriverが最大20秒まで自動待機してくれる
-URL = "https://www.ginsara.jp/"
-driver.get(URL) # slideshareのURLにアクセスする
-
 # スクショ用のファイル設定
 FILENAME1 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "1_トップページ.png")
 FILENAME2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "2_ログインページ.png")
@@ -35,6 +29,11 @@ def index():
 
 @app.route('/sushi/<int:sushi_number>') # sushiの設定ファイルの番号をパスから変数に受け取る
 def sushi(sushi_number):
+    driver = webdriver.PhantomJS() # PhantomJSを使う 
+    driver.set_window_size(1124, 850) # PhantomJSのサイズを指定する
+    driver.implicitly_wait(10) # 指定した要素などがなかった場合出てくるまでdriverが最大20秒まで自動待機してくれる
+    URL = "https://www.ginsara.jp/"
+    driver.get(URL) # slideshareのURLにアクセスする
     f1 = open('setting.json','r') # アカウントのsettingファイルを読み込み
     setting_data = json.load(f1)
     f2 = open('sushi.json','r') # 注文リストのsushiファイルを読み込み
@@ -159,7 +158,7 @@ def sushi(sushi_number):
         ## regist_order.click()  # 配達確定ボタンを押す ======================ここのコメントアウトを外すと確定ボタンを押す===================================== 
         print(u"\n注文を確定しました！")
         
-    # driver.close() # ブラウザ操作を終わらせる
+    driver.close() # ブラウザ操作を終わらせる
     return u"注文しました。確認メールが届くのをお待ち下さい\n"
  
  
