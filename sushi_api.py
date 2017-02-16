@@ -60,14 +60,16 @@ def sushi(sushi_number):
 
     driver.save_screenshot(FILENAME3) # ログイン後商品リストページをスクリーンショット
 
-    # # 注文時間外の場合注文できないので判定できるようにする　まだできていない
-    # if driver.find_element_by_class_name("attention_box").is_displayed():
-    #     print("errorが表示されています。\n")
-    #     error = driver.find_element_by_xpath("//div[@class='attention_box mt10']/p[@class='error']")
-    #     print(error.text)
-    #     return u"営業時間外のため注文できませんでした。"
-    # else:
-    #     print("営業時間内です")
+    # 注文時間外の場合注文できないので判定できるようにする　まだできていない
+    driver.implicitly_wait(1) # 注文可能か確かめる際に待ち時間を少なくする為
+    if len(driver.find_elements_by_class_name("attention_box")) >0:
+        print("errorが表示されています。\n")
+        error = driver.find_element_by_xpath("//div[@class='attention_box mt10']/p[@class='error']")
+        print(error.text)
+        return u"営業時間外のため注文できませんでした。"
+    else:
+        driver.implicitly_wait(10) # 指定した要素などがなかった場合出てくるまでdriverが最大20秒まで自動待機してくれる
+        print("営業時間内です")
 
     # 注文予定の寿司を一つずつ取り出して回す
     for data_id in sushi_data[sushi_number]["sushi"]:   # 一つ一つの寿司を確認していく
